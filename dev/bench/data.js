@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1757949049239,
+  "lastUpdate": 1757950747809,
   "repoUrl": "https://github.com/hyoklee/h5bench",
   "entries": {
     "H5Bench Performance": [
@@ -126,6 +126,42 @@ window.BENCHMARK_DATA = {
           {
             "name": "Test Duration - H5Bench Sync Metadata",
             "value": 0.23,
+            "unit": "seconds",
+            "extra": "Test Status: Passed"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hyoklee@hdfgroup.org",
+            "name": "H. Joe Lee",
+            "username": "hyoklee"
+          },
+          "committer": {
+            "email": "hyoklee@hdfgroup.org",
+            "name": "H. Joe Lee",
+            "username": "hyoklee"
+          },
+          "distinct": true,
+          "id": "7fcb58325c07a328fcf5f3d22da109498dccde6e",
+          "message": "feat: add daily cron schedule with HDF5 change detection\n\n- Run daily at 6 AM UTC via cron schedule\n- Add workflow_dispatch for manual triggers\n- Cache HDF5 builds based on commit hash\n- Check previous HDF5 hash and skip tests if unchanged\n- Store HDF5 commit hash in gh-pages branch\n- Only run tests when HDF5 develop branch changes\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-09-15T10:29:11-05:00",
+          "tree_id": "a885c2164405b0ed33b4800a3fe9e370f2779297",
+          "url": "https://github.com/hyoklee/h5bench/commit/7fcb58325c07a328fcf5f3d22da109498dccde6e"
+        },
+        "date": 1757950747452,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Test Duration - H5Bench Sync",
+            "value": 304.79,
+            "unit": "seconds",
+            "extra": "Test Status: Passed"
+          },
+          {
+            "name": "Test Duration - H5Bench Sync Metadata",
+            "value": 0.22,
             "unit": "seconds",
             "extra": "Test Status: Passed"
           }
