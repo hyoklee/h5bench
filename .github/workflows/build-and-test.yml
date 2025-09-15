@@ -47,7 +47,7 @@ jobs:
         PREV_HASH=""
         if git ls-remote --heads origin gh-pages >/dev/null 2>&1; then
           # Clone gh-pages branch to get previous hash
-          git clone --single-branch --branch gh-pages https://github.com/${{ github.repository }} gh-pages-temp || true
+          git clone --single-branch --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages-temp || true
           if [ -f gh-pages-temp/hdf5-hash.txt ]; then
             PREV_HASH=$(cat gh-pages-temp/hdf5-hash.txt)
           fi
@@ -126,7 +126,7 @@ jobs:
       if: steps.check-hash.outputs.skip_tests != 'true'
       run: |
         # Clone gh-pages to update hash file
-        git clone --single-branch --branch gh-pages https://github.com/${{ github.repository }} gh-pages-update
+        git clone --single-branch --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages-update
         cd gh-pages-update
         echo "${{ steps.hdf5-hash.outputs.hash }}" > hdf5-hash.txt
         git config user.name "github-actions[bot]"
