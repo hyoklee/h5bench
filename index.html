@@ -24,10 +24,6 @@
           <h3>H5Bench Sync Metadata Test Duration</h3>
           <canvas id="metadata-chart"></canvas>
         </div>
-        <div class="chart-container" id="other-metrics-container" style="display: none;">
-          <h3>Other Performance Metrics</h3>
-          <canvas id="other-chart"></canvas>
-        </div>
       </div>
     </main>
 
@@ -72,14 +68,6 @@
         const syncData = benchmarkGroups['Test Duration - H5Bench Sync'] || [];
         const metadataData = benchmarkGroups['Test Duration - H5Bench Sync Metadata'] || [];
 
-        // Collect other metrics (excluding the main two)
-        const otherMetrics = {};
-        Object.keys(benchmarkGroups).forEach(benchName => {
-          if (benchName !== 'Test Duration - H5Bench Sync' &&
-              benchName !== 'Test Duration - H5Bench Sync Metadata') {
-            otherMetrics[benchName] = benchmarkGroups[benchName];
-          }
-        });
 
         // Common chart options
         const commonOptions = {
@@ -159,34 +147,6 @@
           });
         }
 
-        // Create other metrics chart if there are any
-        if (Object.keys(otherMetrics).length > 0) {
-          document.getElementById('other-metrics-container').style.display = 'block';
-
-          const otherDatasets = Object.keys(otherMetrics).map((benchName, index) => {
-            const colors = ['#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'];
-            return {
-              label: benchName,
-              data: otherMetrics[benchName],
-              borderColor: colors[index % colors.length],
-              backgroundColor: colors[index % colors.length] + '20',
-              fill: false,
-              tension: 0.1
-            };
-          });
-
-          const otherCtx = document.getElementById('other-chart').getContext('2d');
-          const otherOptions = {...commonOptions};
-          otherOptions.scales.y.title.text = 'Value';
-
-          new Chart(otherCtx, {
-            type: 'line',
-            data: {
-              datasets: otherDatasets
-            },
-            options: otherOptions
-          });
-        }
 
         console.log('Benchmark data loaded with separate charts');
       }
