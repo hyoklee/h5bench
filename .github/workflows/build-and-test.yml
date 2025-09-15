@@ -45,7 +45,9 @@ jobs:
         make install
 
     - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DHDF5_DIR=$HOME/hdf5-install
+      run: |
+        export HDF5_DIR=$HOME/hdf5-install
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
       run: cmake --build build --parallel
