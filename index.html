@@ -17,7 +17,16 @@
       <div id="status">Loading benchmark data...</div>
       <div id="charts">
         <div class="chart-container">
-          <canvas id="chart"></canvas>
+          <h3>H5Bench Sync Test Duration</h3>
+          <canvas id="sync-chart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>H5Bench Sync Metadata Test Duration</h3>
+          <canvas id="metadata-chart"></canvas>
+        </div>
+        <div class="chart-container" id="other-metrics-container" style="display: none;">
+          <h3>Other Performance Metrics</h3>
+          <canvas id="other-chart"></canvas>
         </div>
       </div>
     </main>
@@ -59,75 +68,127 @@
           });
         });
 
-        // Create datasets for chart
-        const datasets = Object.keys(benchmarkGroups).map((benchName, index) => {
-          const colors = [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-            '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
-          ];
-          return {
-            label: benchName,
-            data: benchmarkGroups[benchName],
-            borderColor: colors[index % colors.length],
-            backgroundColor: colors[index % colors.length] + '20',
-            fill: false,
-            tension: 0.1
-          };
+        // Create separate charts for different benchmark types
+        const syncData = benchmarkGroups['Test Duration - H5Bench Sync'] || [];
+        const metadataData = benchmarkGroups['Test Duration - H5Bench Sync Metadata'] || [];
+
+        // Collect other metrics (excluding the main two)
+        const otherMetrics = {};
+        Object.keys(benchmarkGroups).forEach(benchName => {
+          if (benchName !== 'Test Duration - H5Bench Sync' &&
+              benchName !== 'Test Duration - H5Bench Sync Metadata') {
+            otherMetrics[benchName] = benchmarkGroups[benchName];
+          }
         });
 
-        const chartConfig = {
-          type: 'line',
-          data: {
-            datasets: datasets
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: 'H5Bench Performance Over Time'
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    const point = context.raw;
-                    return `${context.dataset.label}: ${point.y} ${point.unit}`;
-                  },
-                  afterLabel: function(context) {
-                    const point = context.raw;
-                    return [`Commit: ${point.commit}`, point.extra || ''].filter(s => s);
-                  }
+        // Common chart options
+        const commonOptions = {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const point = context.raw;
+                  return `${context.dataset.label}: ${point.y} ${point.unit}`;
+                },
+                afterLabel: function(context) {
+                  const point = context.raw;
+                  return [`Commit: ${point.commit}`, point.extra || ''].filter(s => s);
                 }
               }
-            },
-            interaction: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              x: {
-                type: 'time',
+            }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              type: 'time',
+              display: true,
+              title: {
                 display: true,
-                title: {
-                  display: true,
-                  text: 'Date'
-                }
-              },
-              y: {
+                text: 'Date'
+              }
+            },
+            y: {
+              display: true,
+              title: {
                 display: true,
-                title: {
-                  display: true,
-                  text: 'Value'
-                }
+                text: 'Duration (seconds)'
               }
             }
           }
         };
 
-        const ctx = document.getElementById('chart').getContext('2d');
-        new Chart(ctx, chartConfig);
+        // Create H5Bench Sync chart
+        if (syncData.length > 0) {
+          const syncCtx = document.getElementById('sync-chart').getContext('2d');
+          new Chart(syncCtx, {
+            type: 'line',
+            data: {
+              datasets: [{
+                label: 'H5Bench Sync Duration',
+                data: syncData,
+                borderColor: '#FF6384',
+                backgroundColor: '#FF638420',
+                fill: false,
+                tension: 0.1
+              }]
+            },
+            options: commonOptions
+          });
+        }
 
-        console.log('Benchmark data loaded:', window.BENCHMARK_DATA.length, 'entries');
+        // Create H5Bench Sync Metadata chart
+        if (metadataData.length > 0) {
+          const metadataCtx = document.getElementById('metadata-chart').getContext('2d');
+          new Chart(metadataCtx, {
+            type: 'line',
+            data: {
+              datasets: [{
+                label: 'H5Bench Sync Metadata Duration',
+                data: metadataData,
+                borderColor: '#36A2EB',
+                backgroundColor: '#36A2EB20',
+                fill: false,
+                tension: 0.1
+              }]
+            },
+            options: commonOptions
+          });
+        }
+
+        // Create other metrics chart if there are any
+        if (Object.keys(otherMetrics).length > 0) {
+          document.getElementById('other-metrics-container').style.display = 'block';
+
+          const otherDatasets = Object.keys(otherMetrics).map((benchName, index) => {
+            const colors = ['#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'];
+            return {
+              label: benchName,
+              data: otherMetrics[benchName],
+              borderColor: colors[index % colors.length],
+              backgroundColor: colors[index % colors.length] + '20',
+              fill: false,
+              tension: 0.1
+            };
+          });
+
+          const otherCtx = document.getElementById('other-chart').getContext('2d');
+          const otherOptions = {...commonOptions};
+          otherOptions.scales.y.title.text = 'Value';
+
+          new Chart(otherCtx, {
+            type: 'line',
+            data: {
+              datasets: otherDatasets
+            },
+            options: otherOptions
+          });
+        }
+
+        console.log('Benchmark data loaded with separate charts');
       }
 
       // Display benchmarks when page loads
@@ -177,6 +238,13 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         min-height: 400px;
+      }
+      .chart-container h3 {
+        margin: 0 0 15px 0;
+        color: #24292e;
+        font-size: 1.2em;
+        border-bottom: 2px solid #f6f8fa;
+        padding-bottom: 8px;
       }
       footer {
         text-align: center;
