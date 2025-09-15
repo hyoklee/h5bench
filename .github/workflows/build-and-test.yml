@@ -1,0 +1,78 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openmpi-bin openmpi-common libopenmpi-dev python3-pip build-essential cmake zlib1g-dev
+        pip3 install pytest
+
+    - name: Checkout HDF5
+      uses: actions/checkout@v4
+      with:
+        repository: HDFGroup/hdf5
+        ref: develop
+        path: hdf5
+
+    - name: Build HDF5
+      run: |
+        cd hdf5
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_INSTALL_PREFIX=$HOME/hdf5-install \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DHDF5_ENABLE_PARALLEL=ON \
+          -DHDF5_ENABLE_SUBFILING_VFD=ON \
+          -DHDF5_BUILD_TOOLS=OFF \
+          -DHDF5_BUILD_EXAMPLES=OFF \
+          -DHDF5_BUILD_TESTS=OFF
+        make -j$(nproc)
+        make install
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DHDF5_DIR=$HOME/hdf5-install
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure --verbose | tee ../test-results.txt
+
+    - name: Parse test results for benchmarking
+      run: |
+        python3 scripts/parse_test_results.py test-results.txt benchmark-results.json
+
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: H5Bench Performance
+        tool: 'customSmallerIsBetter'
+        output-file-path: benchmark-results.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          test-results.txt
+          benchmark-results.json
