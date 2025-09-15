@@ -56,28 +56,8 @@ def parse_test_results(file_path: str) -> List[Dict[str, Any]]:
                 "value": value
             })
 
-    # If no specific performance metrics found, at least capture test counts
-    if not any('Performance' in b['name'] or 'Throughput' in b['name'] for b in benchmarks):
-        # Extract test summary
-        summary_pattern = r'(\d+)% tests passed, (\d+) tests failed out of (\d+)'
-        summary_match = re.search(summary_pattern, content)
-
-        if summary_match:
-            passed_percent, failed_count, total_count = summary_match.groups()
-            passed_count = int(total_count) - int(failed_count)
-
-            benchmarks.extend([
-                {
-                    "name": "Tests Passed",
-                    "unit": "count",
-                    "value": passed_count
-                },
-                {
-                    "name": "Test Pass Rate",
-                    "unit": "percent",
-                    "value": float(passed_percent)
-                }
-            ])
+    # Skip adding test count and pass rate metrics to focus on performance data only
+    # These metrics don't provide meaningful performance insights for benchmarking
 
     return benchmarks
 
