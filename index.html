@@ -30,7 +30,7 @@
       function displayBenchmarks() {
         const statusDiv = document.getElementById('status');
 
-        if (typeof window.BENCHMARK_DATA === 'undefined' || !window.BENCHMARK_DATA || window.BENCHMARK_DATA.length === 0) {
+        if (typeof window.BENCHMARK_DATA === 'undefined' || !window.BENCHMARK_DATA || !window.BENCHMARK_DATA.entries) {
           statusDiv.innerHTML = 'No benchmark data available yet. Run the CI to generate initial data.';
           return;
         }
@@ -39,16 +39,22 @@
 
         // Group data by benchmark name
         const benchmarkGroups = {};
-        window.BENCHMARK_DATA.forEach(entry => {
-          entry.benches.forEach(bench => {
-            if (!benchmarkGroups[bench.name]) {
-              benchmarkGroups[bench.name] = [];
-            }
-            benchmarkGroups[bench.name].push({
-              x: new Date(entry.date),
-              y: bench.value,
-              commit: entry.commit.id.substr(0, 8),
-              extra: bench.extra
+
+        // Process the entries object structure used by github-action-benchmark
+        Object.keys(window.BENCHMARK_DATA.entries).forEach(toolName => {
+          const entries = window.BENCHMARK_DATA.entries[toolName];
+          entries.forEach(entry => {
+            entry.benches.forEach(bench => {
+              if (!benchmarkGroups[bench.name]) {
+                benchmarkGroups[bench.name] = [];
+              }
+              benchmarkGroups[bench.name].push({
+                x: new Date(entry.date),
+                y: bench.value,
+                commit: entry.commit.id.substr(0, 8),
+                extra: bench.extra || '',
+                unit: bench.unit || ''
+              });
             });
           });
         });
@@ -83,6 +89,10 @@
               },
               tooltip: {
                 callbacks: {
+                  label: function(context) {
+                    const point = context.raw;
+                    return `${context.dataset.label}: ${point.y} ${point.unit}`;
+                  },
                   afterLabel: function(context) {
                     const point = context.raw;
                     return [`Commit: ${point.commit}`, point.extra || ''].filter(s => s);
