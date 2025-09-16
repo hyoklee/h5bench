@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1757959871413,
+  "lastUpdate": 1758004047497,
   "repoUrl": "https://github.com/hyoklee/h5bench",
   "entries": {
     "H5Bench Performance": [
@@ -234,6 +234,40 @@ window.BENCHMARK_DATA = {
           {
             "name": "Test Duration - H5Bench Sync Metadata",
             "value": 0.22,
+            "unit": "seconds",
+            "extra": "Test Status: Passed"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "H. Joe Lee",
+            "username": "hyoklee",
+            "email": "hyoklee@hdfgroup.org"
+          },
+          "committer": {
+            "name": "H. Joe Lee",
+            "username": "hyoklee",
+            "email": "hyoklee@hdfgroup.org"
+          },
+          "id": "e878e6c2eb20db31a8aa39276ddb7a1d9079d534",
+          "message": "fix: add GitHub token authentication for gh-pages operations\n\n- Use GITHUB_TOKEN for cloning gh-pages branch in check and update steps\n- Resolves authentication error: \"could not read Username for 'https://github.com'\"\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-09-15T18:00:32Z",
+          "url": "https://github.com/hyoklee/h5bench/commit/e878e6c2eb20db31a8aa39276ddb7a1d9079d534"
+        },
+        "date": 1758004046557,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Test Duration - H5Bench Sync",
+            "value": 305.9,
+            "unit": "seconds",
+            "extra": "Test Status: Passed"
+          },
+          {
+            "name": "Test Duration - H5Bench Sync Metadata",
+            "value": 0.21,
             "unit": "seconds",
             "extra": "Test Status: Passed"
           }
